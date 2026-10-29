@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fudge Operations</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="ops-app">
+  <header class="ops-header">
+    <div><span class="overline">Fudge · Supabase</span><h1>Review operations</h1><p>Requirements, workers, search jobs and review inventory in one place.</p></div>
+    <div class="ops-header-actions"><div class="data-health" id="health"><i class="dot"></i><span>Connecting</span></div><button class="btn btn--ghost" id="refresh">Refresh</button></div>
+  </header>
+  <main class="ops-shell">
+    <section class="ops-control-card">
+      <div><span class="overline">Automation</span><h2 id="automationTitle">Loading state…</h2><p id="automationHelp">Supabase is the source of truth for both the dashboard and Chrome workers.</p></div>
+      <div class="ops-control-actions"><button class="btn btn--primary" data-state="running">Start</button><button class="btn btn--ghost" data-state="paused">Pause</button><button class="btn btn--danger" data-state="stopped">Stop</button></div>
+    </section>
+    <section class="ops-metrics" id="metrics" aria-label="Operations summary"></section>
+    <section class="ops-grid">
+      <article class="ops-card ops-card--wide">
+        <header class="ops-card-header"><div><span class="overline">Targets</span><h2>Service requirements</h2><p>Changes save directly to Supabase and are immediately available to workers.</p></div><button class="btn btn--primary" id="addRequirement">Add requirement</button></header>
+        <div class="ops-list" id="requirements"></div>
+      </article>
+      <article class="ops-card">
+        <header class="ops-card-header"><div><span class="overline">Chrome</span><h2>Workers</h2><p>Presence is based on persisted heartbeats.</p></div></header>
+        <div class="ops-list" id="workers"></div>
+      </article>
+      <article class="ops-card">
+        <header class="ops-card-header"><div><span class="overline">Queue</span><h2>Recent jobs</h2><p>Pending, active, completed and failed searches.</p></div></header>
+        <div class="ops-list" id="jobs"></div>
+      </article>
+      <article class="ops-card ops-card--wide">
+        <header class="ops-card-header"><div><span class="overline">Audit trail</span><h2>Recent activity</h2><p>Durable events remain available after clients disconnect.</p></div></header>
+        <div class="ops-list" id="activity"></div>
+      </article>
+    </section>
+  </main>
+  <dialog class="data-dialog requirement-dialog" id="requirementEditor">
+    <form method="dialog" id="requirementForm">
+      <header><div><span class="overline">Requirement</span><h2 id="requirementEditorTitle">Add requirement</h2></div><button class="data-close" value="cancel" aria-label="Close">×</button></header>
+      <input type="hidden" name="id" />
+      <div class="data-fields requirement-fields">
+        <label class="data-field"><span>Requirement name</span><input name="name" required placeholder="Dallas plumbing photo reviews" /></label>
+        <label class="data-field"><span>Service</span><input name="serviceName" required placeholder="Plumbing" /></label>
+        <label class="data-field data-field--wide"><span>Search keywords · one per line</span><textarea name="keywords" rows="4" required placeholder="emergency plumber&#10;water heater repair"></textarea></label>
+        <label class="data-field"><span>Required reviews</span><input name="targetCount" type="number" min="0" value="1" required /></label>
+        <label class="data-field"><span>Backup reviews</span><input name="backupCount" type="number" min="0" value="2" required /></label>
+        <label class="data-field"><span>Priority</span><input name="priority" type="number" min="1" value="100" /></label>
+        <label class="data-field"><span>Status</span><select name="status"><option value="active">Active</option><option value="paused">Paused</option><option value="completed">Completed</option></select></label>
+        <label class="data-field data-field--wide"><span>Locations · comma or one per line</span><textarea name="locationFilters" rows="3" placeholder="Dallas, TX"></textarea></label>
+        <label class="ops-check data-field--wide"><input name="requiresCustomerPhotos" type="checkbox" /><span>Only reviews with customer photos are eligible</span></label>
+      </div>
+      <footer><button class="btn btn--danger" type="button" id="archiveRequirement" hidden>Archive</button><span></span><button class="btn btn--ghost" value="cancel">Cancel</button><button class="btn btn--primary" type="submit" id="saveRequirement">Save requirement</button></footer>
+    </form>
+  </dialog>
+  <div class="toast" id="toast"></div>
+  <script src="config.js"></script>
+  <script src="backend.js"></script>
+</body>
+</html>

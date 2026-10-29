@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# Generated framework state
+.next/
+dist/
+out/
+.wrangler/
+.vinext/
+.sites-runtime/
+*.tsbuildinfo
+next-env.d.ts
+
+# Site publication and local deployment staging
+sites/fudge-operations/outputs/
+sites/fudge-operations/deploy/
+sites/fudge-operations/deploy-bundle/
+sites/fudge-operations/probe-tmp/
+
+# Local environment and secrets
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+*.pem
+
+# Agent and tool state
+.freebuff/
+.agents/
+.codex/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Test output
+coverage/
