@@ -1,6 +1,8 @@
-import { freebuff } from "./lib/freebuff";
+import { NextRequest, NextResponse } from "next/server";
 
-export const proxy = freebuff.proxy;
+export function proxy(_request: NextRequest) {
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.svg).*)"],

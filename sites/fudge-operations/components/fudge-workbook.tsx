@@ -156,7 +156,6 @@ export default function FudgeWorkbook({ userName, canSignOut = false }: { userNa
         <div className="brand-mark">F</div>
         <div className="workbook-title"><strong>Fudge Operations</strong><span><Database size={13} /> Supabase live · All changes saved automatically</span></div>
         <div className="topbar-actions">
-          {canSignOut && <form className="signout" method="post" action="/auth/freebuff/signout"><input type="hidden" name="returnTo" value="/" /><button type="submit">Sign out</button></form>}
           <div className={`live-pill live-pill--${state}`}><i />{state}</div>
           <button className="avatar" title={userName}>{userName.slice(0, 1).toUpperCase()}</button>
         </div>

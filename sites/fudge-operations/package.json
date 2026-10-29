@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
-    "@freebuff/auth": "^0.1.0",
     "@hookform/resolvers": "^5.7.1",
     "@shadcn/react": "^0.3.0",
     "class-variance-authority": "0.7.1",
