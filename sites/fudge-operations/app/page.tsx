@@ -6,7 +6,7 @@ export default async function Home() {
   return (
     <FudgeWorkbook
       userName="Fudge operator"
-      canSignOut={false}
+      canSignOut
     />
   );
 }

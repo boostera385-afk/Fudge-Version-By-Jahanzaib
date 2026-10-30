@@ -3,10 +3,9 @@ declare namespace Cloudflare {
     DB?: D1Database;
     BUCKET?: R2Bucket;
     CONNECTORS?: unknown;
-    FREEBUFF_CLIENT_ID?: string;
-    FREEBUFF_ISSUER?: string;
-    APP_ORIGIN?: string;
-    FREEBUFF_ALLOWED_EMAILS?: string;
-    FREEBUFF_ALLOWED_SUBS?: string;
+    /** Shared sign-in password for the dashboard; at least 12 characters. */
+    FUDGE_DASHBOARD_PASSWORD?: string;
+    /** HMAC key for the session cookie; at least 32 characters. */
+    FUDGE_SESSION_SECRET?: string;
   }
 }

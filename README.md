@@ -9,6 +9,7 @@ Fudge now uses the dedicated **Fudge** Supabase project in the **Account Booster
 - Google Drive remains the picture store. Saved picture links are normalized to `https://drive.google.com/file/d/<id>/view?usp=drive_link`.
 - `drive-setup.html` connects a standalone Apps Script project only for Drive uploads; it does not require a spreadsheet.
 - The deployable database and function sources live under `supabase/`.
+- `sites/fudge-operations/` is the hosted operations dashboard (Cloudflare Worker). It is behind a shared-password sign-in and serves nothing until `FUDGE_DASHBOARD_PASSWORD` and `FUDGE_SESSION_SECRET` are set on the Worker; see that folder's README.
 - Supabase owns services, requirements, search keywords, leased jobs, reviews, assignments, businesses, workers, history and activity logs. Atomic job claims, lease expiry, heartbeats and idempotency make several extensions safe.
 - Supabase Auth/RLS policies are ready for owner, admin, operator and viewer dashboard users. Chrome workers register separately and receive a hashed per-installation worker credential.
 - The dashboard refreshes durable server state every five seconds; the operational tables are also in the Supabase Realtime publication for authenticated clients.

@@ -2,7 +2,38 @@
 
 Private hosted spreadsheet-style dashboard for the Fudge Chrome extension and Supabase backend.
 
-The browser talks only to this Site. The Site authenticates the visitor with ChatGPT sign-in and proxies approved operations to the Fudge Edge Function using server-side environment variables. Google Drive continues to own review pictures and their `drive.google.com/file/d/.../view?usp=drive_link` URLs.
+The browser talks only to this Site. The Site authenticates the visitor against a shared password and proxies approved operations to the Fudge Edge Function using server-side environment variables. Google Drive continues to own review pictures and their `drive.google.com/file/d/.../view?usp=drive_link` URLs.
+
+## Sign-in
+
+`worker/index.ts` runs `guardRequest` from `lib/dashboard-auth.ts` before Vinext sees a request, so the page, the SSR payload and `/api/fudge` are all behind one check. A visitor without a valid session gets a redirect to `/signin`; an `/api` caller without one gets `401`. Signing in sets `fudge_session`, an HttpOnly, SameSite=Lax cookie holding an HMAC-signed expiry, good for 12 hours. `POST /signout` clears it.
+
+Two Worker secrets drive it, and **the Worker serves nothing but a 503 until both are set** — there is no anonymous fallback:
+
+| Secret | Requirement |
+| --- | --- |
+| `FUDGE_DASHBOARD_PASSWORD` | the shared sign-in password, at least 12 characters |
+| `FUDGE_SESSION_SECRET` | HMAC key for the session cookie, at least 32 characters |
+
+Set them on the deployed Worker before publishing a build that contains this gate:
+
+```sh
+npx wrangler secret put FUDGE_DASHBOARD_PASSWORD --name fudge
+npx wrangler secret put FUDGE_SESSION_SECRET --name fudge
+```
+
+Rotating `FUDGE_SESSION_SECRET` invalidates every existing session immediately, which is the way to kick everyone out.
+
+Then build and publish. `npm run deploy` wraps the Worker name, which the generated `dist/server/wrangler.json` does not carry:
+
+```sh
+npm run build:sites
+npm run deploy
+```
+
+For local work put the same two keys in `.dev.vars` (ignored by Git); `npm run dev` and `npm start` both go through the same gate, so without that file a local server also answers 503.
+
+A Worker has no durable store to count failed attempts in, so the gate only delays a wrong password by 400 ms rather than locking an address out. Choose a long random password, and put Cloudflare Access in front of the Worker if you want per-person identity and real lockout instead of one shared secret.
 
 ## Prerequisites
 
@@ -33,6 +64,8 @@ On portable, `npm run dev` uses `vinext dev` with HMR, starting at port 5173. Vi
 For managed Linux browser QA, follow the Sites skill's managed preview reference. The daemon runs the project's Vite dev script with `--host 0.0.0.0 --port 4173 --strictPort`; use the CLI's returned URL. The ignored local profile survives the daemon's cleared environment.
 
 The portable profile simulates ChatGPT sign-in only for loopback development requests. Visit `/signin-with-chatgpt?return_to=/` to sign in as `local_seedy` (`seedy@sites.test`, display name `Seedy`) and `/signout-with-chatgpt?return_to=/` to sign out. The development cookie preserves that identity across server restarts. Mock auth is disabled in the managed-linux profile and is not included in production builds; hosted authentication remains dispatch-owned.
+
+This starter mock is unrelated to the dashboard's own sign-in above, which runs in the Worker and therefore also covers those mock routes. Set `.dev.vars` and sign in at `/signin` to reach anything locally.
 
 The Worker uses `vinext/server/fetch-handler`, including Vinext's config-aware image handling. After building, `npm start` runs that Worker locally through Wrangler on `127.0.0.1`, sharing `.wrangler/state` with dev preview and local D1 migrations; it does not deploy the site or simulate sign-in. Use the URL printed by the server. Pass `npm start -- --port <port>` to select a different built-preview port.
 

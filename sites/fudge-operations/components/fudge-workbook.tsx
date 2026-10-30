@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Activity, Bot, ChevronDown, CirclePause, CirclePlay, Database, FileSpreadsheet, Filter, Plus, RefreshCw, Search, Square, Trash2, X } from "lucide-react";
+import { Activity, Bot, ChevronDown, CirclePause, CirclePlay, Database, FileSpreadsheet, Filter, LogOut, Plus, RefreshCw, Search, Square, Trash2, X } from "lucide-react";
 
 type Snapshot = Record<string, any>;
 type Requirement = Record<string, any>;
@@ -157,6 +157,11 @@ export default function FudgeWorkbook({ userName, canSignOut = false }: { userNa
         <div className="workbook-title"><strong>Fudge Operations</strong><span><Database size={13} /> Supabase live · All changes saved automatically</span></div>
         <div className="topbar-actions">
           <div className={`live-pill live-pill--${state}`}><i />{state}</div>
+          {canSignOut ? (
+            <form className="signout" method="post" action="/signout">
+              <button type="submit" title="Sign out"><LogOut size={14} /> Sign out</button>
+            </form>
+          ) : null}
           <button className="avatar" title={userName}>{userName.slice(0, 1).toUpperCase()}</button>
         </div>
       </header>
