@@ -1,13 +1,19 @@
 import handler from "vinext/server/fetch-handler";
 import { runWithConnectorBinding } from "../lib/connector-context";
+import { guardRequest } from "../lib/dashboard-auth";
 import type { ConnectorBinding } from "../lib/connector-contract.mjs";
 
 const worker = {
-  fetch(
+  async fetch(
     request: Request,
     env: Cloudflare.Env,
     ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>,
-  ): Response | Promise<Response> {
+  ): Promise<Response> {
+    // Sign-in runs ahead of the application, so no page and no /api route can
+    // answer an unauthenticated caller.
+    const gate = await guardRequest(request, env);
+    if (gate) return gate;
+
     let binding = ctx.props?.CONNECTORS;
     // Local preview emulates the same request-scoped capability.
     if (import.meta.env.DEV && !binding && env.CONNECTORS) {
