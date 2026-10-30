@@ -810,15 +810,24 @@ async function dashboardSnapshot(workspaceId: string) {
   ]);
   for (const result of [requirements, keywords, jobs, extensions, activity, reviewCount, duplicateCount]) if (result.error) throw result.error;
   const automation = await automationState(workspaceId);
+  // The job list above is capped, so counting it would under-report every total
+  // once the queue passes that cap. Count in the database instead.
+  const countJobs = async (statuses: string[]) => {
+    const { count, error } = await admin
+      .from("search_jobs")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", workspaceId)
+      .in("status", statuses);
+    if (error) throw error;
+    return count || 0;
+  };
+  const [pendingJobs, activeJobs, completedJobs, failedJobs] = await Promise.all([
+    countJobs(["pending"]), countJobs(["leased", "running"]), countJobs(["completed"]), countJobs(["failed"]),
+  ]);
   return {
     ok: true, automation, requirements: requirements.data || [], keywords: keywords.data || [], jobs: jobs.data || [],
     extensions: extensions.data || [], activity: activity.data || [], reviewCount: reviewCount.count || 0,
-    metrics: {
-      pendingJobs: (jobs.data || []).filter((item) => item.status === "pending").length,
-      activeJobs: (jobs.data || []).filter((item) => ["leased", "running"].includes(item.status)).length,
-      completedJobs: (jobs.data || []).filter((item) => item.status === "completed").length,
-      failedJobs: (jobs.data || []).filter((item) => item.status === "failed").length,
-    },
+    metrics: { pendingJobs, activeJobs, completedJobs, failedJobs },
   };
 }
 

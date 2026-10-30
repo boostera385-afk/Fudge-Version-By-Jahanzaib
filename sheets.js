@@ -441,10 +441,24 @@ const SheetsService = (() => {
 
   async function centralSync(options = {}) {
     const settings = await chrome.storage.local.get({ runState: "", sheetsAutomation: false, parallelTabs: DEFAULT_PARALLEL_JOBS, centralUploadedReviewIds: [] });
-    const running = settings.runState ? settings.runState === "running" : Boolean(settings.sheetsAutomation);
+    let running = settings.runState ? settings.runState === "running" : Boolean(settings.sheetsAutomation);
     await ensureWorkerRegistered();
     const heartbeat = await workerRemote("workerHeartbeat", { status: running ? "online" : "paused", version: chrome.runtime.getManifest().version });
     connectorAutomation = heartbeat.automation || connectorAutomation;
+
+    // Start and Stop are one switch shared with the dashboard, and the side panel
+    // pushes its own presses to the backend. So whatever the backend holds is the
+    // most recent press from either side: adopt it when this installation
+    // disagrees, otherwise pressing Start in the dashboard would set the state and
+    // never reach the worker that has to act on it.
+    const centralState = clean(connectorAutomation && (connectorAutomation.runState || connectorAutomation.state)).toLowerCase();
+    if (centralState === "running" || centralState === "paused" || centralState === "stopped") {
+      const centralRunning = centralState === "running";
+      if (centralRunning !== running) {
+        running = centralRunning;
+        await chrome.storage.local.set({ runState: centralRunning ? "running" : "stopped", sheetsAutomation: centralRunning });
+      }
+    }
 
     const allReviews = await Fudge.getReviews();
     const uploaded = new Set(settings.centralUploadedReviewIds || []);

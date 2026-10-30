@@ -1,0 +1,9 @@
+project_id = "exxknotrmrimwwuyhjqx"
+
+# fudge-backend does its own authentication: the Chrome worker sends
+# x-fudge-extension-token and the dashboard sends x-fudge-token, and neither is
+# a Supabase JWT. The deployed function runs with JWT verification off, so
+# pin it here — a deploy that let the CLI default back to true would reject
+# every extension and dashboard call at the gateway.
+[functions.fudge-backend]
+verify_jwt = false
