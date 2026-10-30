@@ -4,6 +4,14 @@ Private hosted spreadsheet-style dashboard for the Fudge Chrome extension and Su
 
 The browser talks only to this Site. The Site authenticates the visitor against a shared password and proxies approved operations to the Fudge Edge Function using server-side environment variables. Google Drive continues to own review pictures and their `drive.google.com/file/d/.../view?usp=drive_link` URLs.
 
+## Layout
+
+`components/fudge-dashboard.tsx` is the whole interface: a sidebar of sections and one table per section, not a spreadsheet. **Overview** carries the counters, the registered workers and recent activity; **Requirements**, **Search jobs**, **Workers** and **Activity** read the backend's own records; the **Collected data** group reads the tables the backend still stores in sheet shape, and those stay editable in place.
+
+Every table paginates at 50 rows, because the live workspace holds hundreds of requirements and jobs. Search filters the active section, and the Requirements columns sort.
+
+Start, Pause and Stop in the header write the backend's automation state, which the Chrome extension adopts on its next sync — see the root README. The Overview warns when collection is running with jobs queued and no worker online, which is the shape of a disconnected extension.
+
 ## Sign-in
 
 `worker/index.ts` runs `guardRequest` from `lib/dashboard-auth.ts` before Vinext sees a request, so the page, the SSR payload and `/api/fudge` are all behind one check. A visitor without a valid session gets a redirect to `/signin`; an `/api` caller without one gets `401`. Signing in sets `fudge_session`, an HttpOnly, SameSite=Lax cookie holding an HMAC-signed expiry, good for 12 hours. `POST /signout` clears it.

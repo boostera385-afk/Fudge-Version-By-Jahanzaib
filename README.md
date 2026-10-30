@@ -14,7 +14,9 @@ Fudge now uses the dedicated **Fudge** Supabase project in the **Account Booster
 - Supabase Auth/RLS policies are ready for owner, admin, operator and viewer dashboard users. Chrome workers register separately and receive a hashed per-installation worker credential.
 - The dashboard refreshes durable server state every five seconds; the operational tables are also in the Supabase Realtime publication for authenticated clients.
 
-After updating the unpacked extension, reload it once at `chrome://extensions`. That first run registers the worker and imports a previously connected Sheet. Open **Fudge → Open database** to manage requirements, then press **Start** in either the dashboard or extension. The backend starts stopped after installation, so reloading cannot unexpectedly open Google tabs.
+After updating the unpacked extension, reload it once at `chrome://extensions`. That first run registers the worker and imports a previously connected Sheet. Open **Fudge → Open database** to manage requirements, then press **Start** in either the dashboard or extension.
+
+Start and Stop are **one switch, shared with the dashboard**. The side panel pushes each press to the backend, and on its next sync — about every 30 seconds — the extension adopts whatever the backend holds. So pressing Start in the dashboard now starts the extension, and pressing Stop there stops it. Before this, the extension read only its own local switch: the dashboard could set the state but never reached the worker that had to act on it, so queued jobs were never claimed. Because the backend now wins, an installation that syncs while the backend says `running` will begin collecting, including after a reload.
 
 Everything below that describes Sheets is retained as migration and legacy-connector reference. The operational queue is now Supabase.
 
